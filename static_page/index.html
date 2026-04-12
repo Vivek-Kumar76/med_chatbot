@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MedChat Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    background: #f4f6f8;
+}
+
+.sidebar {
+    width: 250px;
+    background: #1e293b;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.chat-history {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 15px;
+    background: #0f172a;
+    color: white;
+    font-size: 18px;
+}
+
+#output {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#output div {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#output div p:first-child {
+    font-weight: bold;
+    color: #1e293b;
+}
+
+#output div p:last-child {
+    margin-top: 5px;
+    color: #334155;
+}
+
+.input-area {
+    display: flex;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+}
+
+.input-area input:focus {
+    border-color: #2563eb;
+}
+
+.input-area button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.input-area button:hover {
+    background: #1d4ed8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>🩺 MedChat</h2>
+    <div class="chat-history" id="history">No chats yet</div>
+</div>
+
+<div class="main">
+    <div class="header">Medical Assistant</div>
+    <div id="output"></div>
+    <div class="input-area">
+        <input id="input" placeholder="Ask a medical question..."
+               onkeydown="if(event.key === 'Enter') sendMessage()" />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById("input");
+    const question = input.value.trim();
+    if (!question) return;
+
+    const output = document.getElementById("output");
+    
+    const container = document.createElement("div");
+
+    const q = document.createElement("p");
+    q.textContent = "Question: " + question;
+
+    const a = document.createElement("p");
+    a.textContent = "Answer: loading...";
+
+    container.appendChild(q);
+    container.appendChild(a);
+    output.insertBefore(container, output.firstChild);
+
+    input.value = "";
+
+    try {
+        const response = await fetch(
+            `http://localhost:8000/ask?query=${encodeURIComponent(question)}`,
+            { method: "GET" }
+        );
+
+        if (!response.ok) throw new Error("Server error");
+
+        const data = await response.json();
+        a.textContent = "Answer: " + (data.answer || data.error || "No response");
+
+    } catch (error) {
+        console.error(error);
+        a.textContent = "Answer: Error fetching response.";
+    }
+}
+</script>
+
+</body>
+</html>
