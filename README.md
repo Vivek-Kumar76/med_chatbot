@@ -1,27 +1,27 @@
-# 🩺 MedChat Pro — AI Medical Assistant
+#  MedChat Pro — AI Medical Assistant
 
 A conversational AI-powered medical assistant built with **FastAPI**, **LangChain**, **FAISS**, and **Google Gemini**. Users can ask medical questions through a clean chat interface and receive context-aware answers grounded in a curated medical QA dataset.
 
 ---
 
-## 📸 Preview
+##  Preview
 
 > A sidebar chat UI where users type medical questions and receive AI-generated answers with diet and medication suggestions.
 
 ---
 
-## 🚀 Features
+##  Features
 
-- 🔍 **Semantic Search** — Uses FAISS vector store with semantic chunking for relevant document retrieval
-- 🤖 **Gemini LLM** — Powered by Google's "gemini-3-flash-preview" model for fast, accurate responses
-- 💬 **Chat Interface** — Clean, responsive HTML/CSS frontend with chat history sidebar
-- 📦 **Persistent Index** — FAISS index is built once and reused across restarts
-- 🌐 **REST API** — FastAPI backend with CORS support, easily extensible
-- 🥗 **Holistic Responses** — Answers include diet suggestions and medicine recommendations
+-  **Semantic Search** — Uses FAISS vector store with semantic chunking for relevant document retrieval
+-  **Gemini LLM** — Powered by Google's "gemini-3-flash-preview" model for fast, accurate responses
+-  **Chat Interface** — Clean, responsive HTML/CSS frontend with chat history sidebar
+-  **Persistent Index** — FAISS index is built once and reused across restarts
+-  **REST API** — FastAPI backend with CORS support, easily extensible
+-  **Holistic Responses** — Answers include diet suggestions and medicine recommendations
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -35,7 +35,7 @@ A conversational AI-powered medical assistant built with **FastAPI**, **LangChai
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 medchat-pro/
@@ -51,7 +51,7 @@ medchat-pro/
 
 ---
 
-## ⚙️ Setup & Installation
+##  Setup & Installation
 
 ### 1. Clone the Repository
 
@@ -116,7 +116,7 @@ On **first run**, the FAISS index is built from the dataset (this may take a few
 
 ---
 
-## 🔌 API Reference
+##  API Reference
 
 ### `GET /ask`
 
@@ -143,9 +143,9 @@ curl "http://localhost:8000/ask?query=What+are+symptoms+of+anemia"
 }
 ```
 
----
+--
 
-## 📦 Requirements
+##  Requirements
 
 Create `requirements.txt` with:
 
@@ -164,7 +164,7 @@ sentence-transformers
 
 ---
 
-## 🏗️ How It Works
+##  How It Works
 
 ```
 User Question
@@ -193,34 +193,17 @@ Answer with diet & medicine suggestions → User
 ```
 medquad.csv → LangChain Documents → Semantic Chunker → HuggingFace Embeddings → FAISS Index (saved to disk)
 ```
-
----
-
-## ⚠️ Disclaimer
-
-> This application is for **educational and informational purposes only**. It is **not a substitute for professional medical advice, diagnosis, or treatment**. Always consult a qualified healthcare provider for medical concerns.
-
----
-
 ##  Contributing
 
 Contributions are welcome! To contribute:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add your feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
+2. Create a feature branch (git checkout -b feature/your-feature)
+3. Commit your changes (git commit -m 'Add your feature)
+4. Push to the branch (git push origin feature/your-feature)
 5. Open a Pull Request
 
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## 🙏 Acknowledgements
+##  Acknowledgements
 
 - [MedQuAD Dataset](https://www.nlm.nih.gov/) — U.S. National Library of Medicine
 - [LangChain](https://www.langchain.com/) — LLM application framework
