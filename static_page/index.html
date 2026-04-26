@@ -2,166 +2,938 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MedChat Pro</title>
+<title>MedChat AI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+:root {
+  --bg:           #080d14;
+  --surface:      #0e1620;
+  --surface-2:    #131e2c;
+  --border:       rgba(56, 189, 248, 0.10);
+  --border-glow:  rgba(56, 189, 248, 0.25);
+  --accent:       #38bdf8;
+  --accent-dim:   rgba(56, 189, 248, 0.12);
+  --accent-glow:  rgba(56, 189, 248, 0.06);
+  --red:          #f87171;
+  --red-dim:      rgba(248, 113, 113, 0.12);
+  --green:        #4ade80;
+  --amber:        #fbbf24;
+  --text-1:       #e2eaf4;
+  --text-2:       #7a95b0;
+  --text-3:       #3d5468;
+  --user-bg:      rgba(56, 189, 248, 0.08);
+  --user-border:  rgba(56, 189, 248, 0.20);
+  --ai-bg:        rgba(14, 22, 32, 0.95);
+  --ai-border:    rgba(56, 189, 248, 0.08);
+  --font-display: 'DM Serif Display', serif;
+  --font-ui:      'Instrument Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-    display: flex;
-    height: 100vh;
-    background: #f4f6f8;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.sidebar {
-    width: 250px;
-    background: #1e293b;
-    color: white;
-    padding: 20px;
+/* ---- Background grid texture ---- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.sidebar h2 {
-    margin-bottom: 20px;
+/* ---- Ambient glow ---- */
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(56,189,248,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.chat-history {
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
+/* ============ HEADER ============ */
 .header {
-    padding: 15px;
-    background: #0f172a;
-    color: white;
-    font-size: 18px;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 64px;
+  background: rgba(8,13,20,0.92);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
 }
 
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-glow);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  position: relative;
+}
+
+.header-icon::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text-1);
+  letter-spacing: 0.01em;
+}
+
+.header-title span {
+  color: var(--accent);
+}
+
+.header-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-glow);
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+  50%       { opacity: 0.5; box-shadow: 0 0 3px var(--green); }
+}
+
+/* ============ CHAT AREA ============ */
 #output {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  z-index: 1;
+  scroll-behavior: smooth;
 }
 
-#output div {
-    margin-bottom: 15px;
-    padding: 12px;
-    border-radius: 10px;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+#output::-webkit-scrollbar { width: 4px; }
+#output::-webkit-scrollbar-track { background: transparent; }
+#output::-webkit-scrollbar-thumb {
+  background: var(--border-glow);
+  border-radius: 2px;
 }
 
-#output div p:first-child {
-    font-weight: bold;
-    color: #1e293b;
+/* ---- Welcome screen ---- */
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  animation: fade-up 0.6s ease both;
 }
 
-#output div p:last-child {
-    margin-top: 5px;
-    color: #334155;
+.welcome-icon {
+  font-size: 52px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 20px rgba(56,189,248,0.4));
 }
 
-.input-area {
-    display: flex;
-    padding: 15px;
-    background: white;
-    border-top: 1px solid #ddd;
+.welcome h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-1);
+  margin-bottom: 10px;
 }
 
-.input-area input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    outline: none;
+.welcome h2 em {
+  color: var(--accent);
+  font-style: italic;
 }
 
-.input-area input:focus {
-    border-color: #2563eb;
+.welcome p {
+  font-size: 14px;
+  color: var(--text-2);
+  max-width: 420px;
+  line-height: 1.7;
+  margin-bottom: 32px;
 }
 
-.input-area button {
-    margin-left: 10px;
-    padding: 10px 20px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  max-width: 560px;
 }
 
-.input-area button:hover {
-    background: #1d4ed8;
+.suggestion-chip {
+  font-size: 12.5px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-glow);
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.suggestion-chip:hover {
+  background: rgba(56,189,248,0.18);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(56,189,248,0.15);
+}
+
+/* ---- Message rows ---- */
+.msg-row {
+  display: flex;
+  padding: 6px 28px;
+  animation: fade-up 0.35s ease both;
+  max-width: 100%;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg-row.user { justify-content: flex-end; }
+.msg-row.ai   { justify-content: flex-start; }
+
+/* ---- Bubble ---- */
+.bubble {
+  max-width: 72%;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.75;
+  position: relative;
+  word-break: break-word;
+}
+
+.msg-row.user .bubble {
+  background: var(--user-bg);
+  border: 1px solid var(--user-border);
+  border-bottom-right-radius: 4px;
+  color: var(--text-1);
+  font-weight: 500;
+}
+
+.msg-row.ai .bubble {
+  background: var(--ai-bg);
+  border: 1px solid var(--ai-border);
+  border-bottom-left-radius: 4px;
+  color: var(--text-1);
+}
+
+/* ---- Avatar ---- */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.msg-row.user { gap: 10px; }
+.msg-row.ai   { gap: 10px; }
+
+.avatar.user-av {
+  background: var(--accent-dim);
+  border: 1px solid var(--border-glow);
+  order: 2;
+}
+
+.avatar.ai-av {
+  background: rgba(74,222,128,0.1);
+  border: 1px solid rgba(74,222,128,0.2);
+  order: 0;
+}
+
+.msg-row.user .bubble { order: 1; }
+.msg-row.ai   .bubble { order: 1; }
+
+/* ---- Emergency bubble ---- */
+.bubble.emergency {
+  background: var(--red-dim);
+  border-color: rgba(248,113,113,0.35);
+  border-left: 3px solid var(--red);
+}
+
+/* ---- Markdown-style rendering ---- */
+.bubble strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.bubble .section-block {
+  margin: 10px 0;
+  padding: 10px 14px;
+  background: rgba(56,189,248,0.04);
+  border-left: 2px solid var(--border-glow);
+  border-radius: 0 8px 8px 0;
+}
+
+.bubble .section-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.bubble .divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 14px 0;
+}
+
+.bubble ul, .bubble ol {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.bubble li {
+  margin: 4px 0;
+  color: var(--text-2);
+}
+
+.bubble li::marker { color: var(--accent); }
+
+.bubble a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-glow);
+  transition: border-color 0.2s;
+}
+.bubble a:hover { border-color: var(--accent); }
+
+.bubble .news-item {
+  margin: 10px 0;
+  padding: 10px 12px;
+  background: rgba(14,22,32,0.8);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.bubble .news-item:hover { border-color: var(--border-glow); }
+.bubble .news-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-1);
+  margin-bottom: 4px;
+}
+.bubble .news-snippet { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.bubble .news-link {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  margin-top: 4px;
+  display: block;
+  border: none;
+}
+
+.bubble .hospital-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 6px 0;
+  background: rgba(14,22,32,0.8);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.bubble .hospital-icon { font-size: 18px; }
+.bubble .hospital-name { font-weight: 500; font-size: 13.5px; color: var(--text-1); }
+.bubble .hospital-meta { font-size: 11.5px; font-family: var(--font-mono); color: var(--text-2); margin-top: 2px; }
+
+.risk-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.risk-low    { background: rgba(74,222,128,0.12); color: var(--green);  border: 1px solid rgba(74,222,128,0.3); }
+.risk-medium { background: rgba(251,191,36,0.12);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.3); }
+.risk-high   { background: rgba(248,113,113,0.12); color: var(--red);   border: 1px solid rgba(248,113,113,0.3); }
+
+/* ---- Typing loader ---- */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 18px;
+}
+.typing-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.4;
+  animation: blink 1.2s ease-in-out infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+  40%            { opacity: 1;   transform: scale(1.1); }
+}
+
+/* ---- Timestamp ---- */
+.timestamp {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  margin-top: 5px;
+  text-align: right;
+}
+.msg-row.ai .timestamp { text-align: left; }
+
+/* ============ INPUT AREA ============ */
+.input-wrap {
+  position: relative;
+  z-index: 10;
+  background: rgba(8,13,20,0.95);
+  border-top: 1px solid var(--border);
+  padding: 16px 28px 20px;
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+
+.input-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px 6px 6px 18px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.input-inner:focus-within {
+  border-color: var(--border-glow);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.07), 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.input-inner input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  caret-color: var(--accent);
+}
+
+.input-inner input::placeholder { color: var(--text-3); }
+
+.send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #080d14;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #7dd3fc;
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(56,189,248,0.35);
+}
+
+.send-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.send-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.input-hint {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  margin-top: 8px;
+  text-align: center;
+}
+
+.input-hint kbd {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+/* ============ EMERGENCY BANNER ============ */
+.emergency-banner {
+  display: none;
+  position: fixed;
+  top: 64px;
+  left: 0; right: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, rgba(248,113,113,0.15), rgba(248,113,113,0.08));
+  border-bottom: 1px solid rgba(248,113,113,0.3);
+  padding: 12px 28px;
+  font-size: 13px;
+  color: var(--red);
+  font-weight: 500;
+  animation: slide-down 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.emergency-banner.visible { display: flex; align-items: center; gap: 10px; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 600px) {
+  .header { padding: 0 16px; }
+  .header-badge { display: none; }
+  .msg-row { padding: 6px 14px; }
+  .bubble { max-width: 88%; font-size: 13.5px; }
+  .input-wrap { padding: 12px 14px 16px; }
+  .welcome h2 { font-size: 24px; }
 }
 </style>
 </head>
-
 <body>
 
-<div class="sidebar">
-    <h2>🩺 MedChat</h2>
-    <div class="chat-history" id="history">No chats yet</div>
+<!-- Emergency Banner -->
+<div class="emergency-banner" id="emergencyBanner">
+  🚨 <span id="emergencyText">Emergency detected. Call 112 immediately.</span>
 </div>
 
-<div class="main">
-    <div class="header">Medical Assistant</div>
-    <div id="output"></div>
-    <div class="input-area">
-        <input id="input" placeholder="Ask a medical question..."
-               onkeydown="if(event.key === 'Enter') sendMessage()" />
-        <button onclick="sendMessage()">Send</button>
+<!-- Header -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-icon">🩺</div>
+    <div>
+      <div class="header-title">Med<span>Chat</span> AI</div>
     </div>
+    <div class="header-badge">Beta</div>
+  </div>
+  <div class="header-status">
+    <div class="status-dot"></div>
+    Online
+  </div>
+</header>
+
+<!-- Chat output -->
+<div id="output">
+  <div class="welcome" id="welcome">
+    <div class="welcome-icon">⚕️</div>
+    <h2>Your <em>Medical</em> Assistant</h2>
+    <p>Ask about symptoms, conditions, nearby hospitals, or the latest medical news. I'll help with structured advice and always remind you to consult a doctor.</p>
+    <div class="suggestions">
+      <div class="suggestion-chip" onclick="fillInput('I have a severe headache and fever')">🤒 Headache & Fever</div>
+      <div class="suggestion-chip" onclick="fillInput('Find hospitals near Delhi')">🏥 Hospitals near Delhi</div>
+      <div class="suggestion-chip" onclick="fillInput('Latest news on diabetes treatment')">📰 Diabetes news</div>
+      <div class="suggestion-chip" onclick="fillInput('I have chest pain and difficulty breathing')">⚠️ Chest pain</div>
+      <div class="suggestion-chip" onclick="fillInput('What are symptoms of dengue fever?')">🦟 Dengue symptoms</div>
+      <div class="suggestion-chip" onclick="fillInput('I have a skin rash that is itching badly')">🩹 Skin rash</div>
+    </div>
+  </div>
+</div>
+
+<!-- Input -->
+<div class="input-wrap">
+  <div class="input-inner">
+    <input
+      id="input"
+      placeholder="Describe symptoms, ask about hospitals or medical news…"
+      onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"
+      autocomplete="off"
+    />
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div class="input-hint">Press <kbd>Enter</kbd> to send &nbsp;·&nbsp; Not a substitute for professional medical advice</div>
 </div>
 
 <script>
-async function sendMessage() {
-    const input = document.getElementById("input");
-    const question = input.value.trim();
-    if (!question) return;
+/* ---- Utility ---- */
+function now() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
-    const output = document.getElementById("output");
-    
-    const container = document.createElement("div");
+function fillInput(text) {
+  const inp = document.getElementById('input');
+  inp.value = text;
+  inp.focus();
+}
 
-    const q = document.createElement("p");
-    q.textContent = "Question: " + question;
+function scrollBottom() {
+  const out = document.getElementById('output');
+  out.scrollTop = out.scrollHeight;
+}
 
-    const a = document.createElement("p");
-    a.textContent = "Answer: loading...";
+/* ---- Render formatted response ---- */
+function renderResponse(text) {
+  const isEmergency = /EMERGENCY|AMBULANCE|call\s*1[01][02]/i.test(text);
 
-    container.appendChild(q);
-    container.appendChild(a);
-    output.insertBefore(container, output.firstChild);
+  // Show emergency banner
+  if (isEmergency) {
+    const banner = document.getElementById('emergencyBanner');
+    banner.classList.add('visible');
+    document.getElementById('emergencyText').textContent =
+      '🚨 Emergency detected! Call 112 (Ambulance: 102) immediately.';
+    setTimeout(() => banner.classList.remove('visible'), 15000);
+  }
 
-    input.value = "";
+  // Split by --- sections
+  const sections = text.split(/\n---+\n/);
+  let html = '';
 
-    try {
-        const response = await fetch(
-            `http://localhost:8000/ask?query=${encodeURIComponent(question)}`,
-            { method: "GET" }
-        );
+  sections.forEach((section, idx) => {
+    if (idx > 0) html += '<hr class="divider">';
 
-        if (!response.ok) throw new Error("Server error");
+    // Detect section type
+    const isNews    = /📰|Latest.*News|News:/i.test(section);
+    const isHospital= /🏥|Nearby.*Hospital|Hospital.*Clinic/i.test(section);
+    const isEmerg   = /EMERGENCY|🚨/i.test(section);
 
-        const data = await response.json();
-        a.textContent = "Answer: " + (data.answer || data.error || "No response");
-
-    } catch (error) {
-        console.error(error);
-        a.textContent = "Answer: Error fetching response.";
+    if (isEmerg) {
+      html += `<div style="color:var(--red)">${formatText(section)}</div>`;
+    } else if (isNews) {
+      html += renderNewsSection(section);
+    } else if (isHospital) {
+      html += renderHospitalSection(section);
+    } else {
+      html += renderMedicalSection(section);
     }
+  });
+
+  return { html, isEmergency };
+}
+
+function formatText(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n•\s/g, '<br>• ')
+    .replace(/\n(\d+)\.\s/g, '<br>$1. ')
+    .replace(/\n/g, '<br>');
+}
+
+function renderMedicalSection(text) {
+  let html = '';
+  const lines = text.split('\n');
+
+  lines.forEach(line => {
+    if (!line.trim()) return;
+
+    // Section headers like **Problem Explanation:**
+    const headerMatch = line.match(/^\*\*(.+?):\*\*\s*(.*)/);
+    if (headerMatch) {
+      const title = headerMatch[1];
+      const content = headerMatch[2];
+
+      // Risk level special rendering
+      if (/risk level/i.test(title)) {
+        const level = (content.match(/LOW|MEDIUM|HIGH/i) || [''])[0].toUpperCase();
+        const cls = level === 'LOW' ? 'risk-low' : level === 'HIGH' ? 'risk-high' : 'risk-medium';
+        html += `
+          <div class="section-block">
+            <div class="section-title">${title}</div>
+            <span class="risk-badge ${cls}">${level || content}</span>
+          </div>`;
+      } else {
+        html += `
+          <div class="section-block">
+            <div class="section-title">${title}</div>
+            <div>${content || ''}</div>
+          </div>`;
+      }
+      return;
+    }
+
+    // Bullet points
+    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+      html += `<li>${formatText(line.replace(/^[•\-\*]\s*/, ''))}</li>`;
+      return;
+    }
+
+    // Numbered list
+    if (/^\d+\./.test(line)) {
+      html += `<li>${formatText(line.replace(/^\d+\.\s*/, ''))}</li>`;
+      return;
+    }
+
+    html += `<p style="margin:4px 0">${formatText(line)}</p>`;
+  });
+
+  return html;
+}
+
+function renderNewsSection(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  let html = '<div class="section-title" style="margin-bottom:10px">📰 Latest News</div>';
+
+  let current = null;
+  lines.forEach(line => {
+    if (line.startsWith('•') || line.match(/^\*\*/)) {
+      if (current) html += buildNewsItem(current);
+      current = { title: '', snippet: '', link: '' };
+      current.title = line.replace(/^•\s*\*\*/, '').replace(/\*\*$/, '').replace(/^•\s*/, '');
+    } else if (line.startsWith('  ') && !line.includes('🔗')) {
+      if (current) current.snippet = line.trim();
+    } else if (line.includes('🔗')) {
+      if (current) current.link = line.replace(/.*🔗\s*/, '').trim();
+    }
+  });
+  if (current) html += buildNewsItem(current);
+
+  return html;
+}
+
+function buildNewsItem(item) {
+  return `
+    <div class="news-item">
+      <div class="news-title">${item.title || 'News'}</div>
+      ${item.snippet ? `<div class="news-snippet">${item.snippet}</div>` : ''}
+      ${item.link ? `<a class="news-link" href="${item.link}" target="_blank" rel="noopener">🔗 ${item.link}</a>` : ''}
+    </div>`;
+}
+
+function renderHospitalSection(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  let html = '';
+
+  lines.forEach(line => {
+    if (line.includes('🏥') || line.startsWith('•')) {
+      const parts = line.replace(/^•\s*🏥\s*/, '').split('|');
+      const name  = (parts[0] || '').replace(/\*\*/g, '').trim();
+      const phone = (parts[1] || '').replace('📞', '').trim();
+      const type  = name.match(/\((.+?)\)/)?.[1] || 'Hospital';
+      const cleanName = name.replace(/\(.+?\)/, '').trim();
+      html += `
+        <div class="hospital-item">
+          <div class="hospital-icon">🏥</div>
+          <div>
+            <div class="hospital-name">${cleanName}</div>
+            <div class="hospital-meta">${type} · ${phone || 'N/A'}</div>
+          </div>
+        </div>`;
+    } else if (line.includes('102') || line.includes('112') || line.includes('EMERGENCY')) {
+      html += `<div style="margin-top:12px;padding:10px 14px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.2);border-radius:8px;font-size:12.5px;color:var(--red)">${formatText(line)}</div>`;
+    } else if (line.trim()) {
+      html += `<p style="margin:4px 0;color:var(--text-2);font-size:13px">${formatText(line)}</p>`;
+    }
+  });
+
+  return html;
+}
+
+/* ---- Add message to chat ---- */
+function addMessage(role, content, isHtml = false) {
+  // Remove welcome screen on first message
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const output = document.getElementById('output');
+
+  const row = document.createElement('div');
+  row.className = `msg-row ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role === 'user' ? 'user-av' : 'ai-av'}`;
+  avatar.textContent = role === 'user' ? '👤' : '🩺';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+
+  if (isHtml) {
+    bubble.innerHTML = content;
+  } else {
+    bubble.textContent = content;
+  }
+
+  const ts = document.createElement('div');
+  ts.className = 'timestamp';
+  ts.textContent = now();
+
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.appendChild(bubble);
+  wrap.appendChild(ts);
+
+  row.appendChild(avatar);
+  row.appendChild(wrap);
+  output.appendChild(row);
+
+  scrollBottom();
+  return bubble;
+}
+
+function addTypingIndicator() {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const output = document.getElementById('output');
+  const row = document.createElement('div');
+  row.className = 'msg-row ai';
+  row.id = 'typing-row';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ai-av';
+  avatar.textContent = '🩺';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  output.appendChild(row);
+  scrollBottom();
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-row');
+  if (el) el.remove();
+}
+
+/* ---- Main send function (API logic unchanged) ---- */
+async function sendMessage() {
+  const input   = document.getElementById('input');
+  const sendBtn = document.getElementById('sendBtn');
+  const question = input.value.trim();
+  if (!question) return;
+
+  addMessage('user', question);
+  input.value = '';
+  input.disabled  = true;
+  sendBtn.disabled = true;
+
+  addTypingIndicator();
+
+  try {
+    const response = await fetch(
+      `http://localhost:8000/agent?query=${encodeURIComponent(question)}`
+    );
+
+    const data = await response.json();
+    removeTypingIndicator();
+
+    const rawText = data.response || data.error || 'No response received.';
+    const { html, isEmergency } = renderResponse(rawText);
+
+    const bubble = addMessage('ai', html, true);
+    if (isEmergency) bubble.classList.add('emergency');
+
+  } catch (error) {
+    removeTypingIndicator();
+    addMessage('ai',
+      '<strong style="color:var(--red)">Connection Error</strong><br>Could not reach the server. Please ensure the backend is running on <code style="font-family:var(--font-mono);background:var(--surface-2);padding:2px 5px;border-radius:3px">localhost:8000</code>.',
+      true
+    );
+  } finally {
+    input.disabled   = false;
+    sendBtn.disabled = false;
+    input.focus();
+  }
 }
 </script>
-
 </body>
 </html>
