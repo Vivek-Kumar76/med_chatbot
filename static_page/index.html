@@ -8,280 +8,373 @@
 
 <style>
 :root {
-  --bg:           #080d14;
-  --surface:      #0e1620;
-  --surface-2:    #131e2c;
-  --border:       rgba(56, 189, 248, 0.10);
-  --border-glow:  rgba(56, 189, 248, 0.25);
+  --bg:           #060b11;
+  --surface:      #0b1520;
+  --surface-2:    #101d2a;
+  --surface-3:    #162333;
+  --border:       rgba(56, 189, 248, 0.09);
+  --border-glow:  rgba(56, 189, 248, 0.22);
   --accent:       #38bdf8;
-  --accent-dim:   rgba(56, 189, 248, 0.12);
-  --accent-glow:  rgba(56, 189, 248, 0.06);
+  --accent-dim:   rgba(56, 189, 248, 0.10);
+  --accent-glow:  rgba(56, 189, 248, 0.05);
   --red:          #f87171;
-  --red-dim:      rgba(248, 113, 113, 0.12);
+  --red-dim:      rgba(248, 113, 113, 0.10);
   --green:        #4ade80;
   --amber:        #fbbf24;
+  --purple:       #a78bfa;
   --text-1:       #e2eaf4;
   --text-2:       #7a95b0;
   --text-3:       #3d5468;
-  --user-bg:      rgba(56, 189, 248, 0.08);
-  --user-border:  rgba(56, 189, 248, 0.20);
-  --ai-bg:        rgba(14, 22, 32, 0.95);
-  --ai-border:    rgba(56, 189, 248, 0.08);
+  --user-bg:      rgba(56, 189, 248, 0.07);
+  --user-border:  rgba(56, 189, 248, 0.18);
+  --ai-bg:        rgba(11, 21, 32, 0.97);
+  --ai-border:    rgba(56, 189, 248, 0.07);
   --font-display: 'DM Serif Display', serif;
   --font-ui:      'Instrument Sans', sans-serif;
   --font-mono:    'DM Mono', monospace;
+  --radius:       16px;
+  --sidebar-w:    260px;
 }
 
-*, *::before, *::after {
-  margin: 0; padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
 
 body {
   background: var(--bg);
   color: var(--text-1);
   font-family: var(--font-ui);
   display: flex;
-  flex-direction: column;
   position: relative;
 }
 
-/* ---- Background grid texture ---- */
+/* ── Animated background ── */
 body::before {
   content: '';
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background-image:
-    linear-gradient(rgba(56,189,248,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,0.025) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
+    linear-gradient(rgba(56,189,248,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.02) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none; z-index: 0;
 }
 
-/* ---- Ambient glow ---- */
-body::after {
-  content: '';
+/* ── Ambient orbs ── */
+.orb {
   position: fixed;
-  top: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 400px;
-  background: radial-gradient(ellipse, rgba(56,189,248,0.07) 0%, transparent 70%);
+  border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  filter: blur(80px);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.orb-1 {
+  width: 500px; height: 500px;
+  top: -150px; left: 20%;
+  background: radial-gradient(ellipse, rgba(56,189,248,0.06) 0%, transparent 70%);
+  animation-duration: 20s;
+}
+.orb-2 {
+  width: 350px; height: 350px;
+  bottom: 0; right: 5%;
+  background: radial-gradient(ellipse, rgba(167,139,250,0.05) 0%, transparent 70%);
+  animation-duration: 25s; animation-delay: -8s;
+}
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(30px, 20px) scale(1.05); }
 }
 
-/* ============ HEADER ============ */
-.header {
+/* ══════════════ SIDEBAR ══════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  background: rgba(8, 14, 22, 0.95);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
   position: relative;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  height: 64px;
-  background: rgba(8,13,20,0.92);
+  backdrop-filter: blur(20px);
+}
+
+.sidebar-brand {
+  padding: 24px 20px 20px;
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  flex-shrink: 0;
 }
 
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--accent-dim);
+.brand-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(56,189,248,0.05));
   border: 1px solid var(--border-glow);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  position: relative;
-}
-
-.header-icon::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(56,189,248,0.3), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.header-title {
-  font-family: var(--font-display);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
   font-size: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 0 20px rgba(56,189,248,0.1);
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 19px;
   color: var(--text-1);
-  letter-spacing: 0.01em;
 }
+.brand-name span { color: var(--accent); }
 
-.header-title span {
-  color: var(--accent);
-}
-
-.header-badge {
+.brand-tag {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9.5px;
   color: var(--accent);
   background: var(--accent-dim);
   border: 1px solid var(--border-glow);
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  display: inline-block;
+  margin-top: 5px;
 }
 
-.header-status {
+.sidebar-section {
+  padding: 16px 16px 8px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0 10px;
+  overflow-y: auto;
+}
+
+.nav-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 12px;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
   color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--accent-dim); color: var(--text-1); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-glow); }
+.nav-item .nav-icon { font-size: 15px; flex-shrink: 0; }
+.nav-item .nav-label { flex: 1; }
+.nav-item .nav-badge {
   font-family: var(--font-mono);
+  font-size: 9px;
+  background: var(--surface-3);
+  padding: 2px 6px;
+  border-radius: 8px;
+  color: var(--text-3);
 }
 
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-2);
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
 .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 8px var(--green);
   animation: pulse-dot 2.5s ease-in-out infinite;
 }
-
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
   50%       { opacity: 0.5; box-shadow: 0 0 3px var(--green); }
 }
 
-/* ============ CHAT AREA ============ */
+/* ══════════════ MAIN AREA ══════════════ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Top bar ── */
+.topbar {
+  height: 56px;
+  background: rgba(6,11,17,0.9);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.topbar-title strong { color: var(--text-1); font-weight: 600; }
+.topbar-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.topbar-info {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+}
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.clear-btn {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.clear-btn:hover { color: var(--text-2); border-color: var(--border-glow); }
+
+/* ══════════════ CHAT AREA ══════════════ */
 #output {
   flex: 1;
   overflow-y: auto;
-  padding: 28px 0;
+  padding: 24px 0 16px;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  position: relative;
-  z-index: 1;
   scroll-behavior: smooth;
 }
-
 #output::-webkit-scrollbar { width: 4px; }
 #output::-webkit-scrollbar-track { background: transparent; }
-#output::-webkit-scrollbar-thumb {
-  background: var(--border-glow);
-  border-radius: 2px;
-}
+#output::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
 
-/* ---- Welcome screen ---- */
+/* ── Welcome ── */
 .welcome {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 40px 24px;
   text-align: center;
-  animation: fade-up 0.6s ease both;
+  animation: fade-up 0.7s ease both;
 }
-
-.welcome-icon {
-  font-size: 52px;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 20px rgba(56,189,248,0.4));
+.welcome-glyph {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(56,189,248,0.03));
+  border: 1px solid var(--border-glow);
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 40px rgba(56,189,248,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
+  animation: float 4s ease-in-out infinite;
 }
-
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
 .welcome h2 {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 30px;
   color: var(--text-1);
   margin-bottom: 10px;
+  line-height: 1.2;
 }
-
-.welcome h2 em {
-  color: var(--accent);
-  font-style: italic;
-}
-
+.welcome h2 em { color: var(--accent); font-style: italic; }
 .welcome p {
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-2);
-  max-width: 420px;
-  line-height: 1.7;
-  margin-bottom: 32px;
+  max-width: 400px;
+  line-height: 1.75;
+  margin-bottom: 30px;
 }
-
-.suggestions {
+.chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
-  max-width: 560px;
+  max-width: 520px;
 }
-
-.suggestion-chip {
-  font-size: 12.5px;
+.chip {
+  font-size: 12px;
   font-family: var(--font-mono);
   color: var(--accent);
   background: var(--accent-dim);
   border: 1px solid var(--border-glow);
-  padding: 8px 14px;
+  padding: 7px 14px;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s;
-  letter-spacing: 0.01em;
 }
-
-.suggestion-chip:hover {
-  background: rgba(56,189,248,0.18);
+.chip:hover {
+  background: rgba(56,189,248,0.16);
   border-color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(56,189,248,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(56,189,248,0.15);
 }
 
-/* ---- Message rows ---- */
+/* ── Messages ── */
 .msg-row {
   display: flex;
-  padding: 6px 28px;
-  animation: fade-up 0.35s ease both;
+  padding: 5px 24px;
+  animation: fade-up 0.3s ease both;
   max-width: 100%;
 }
-
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 .msg-row.user { justify-content: flex-end; }
 .msg-row.ai   { justify-content: flex-start; }
 
-/* ---- Bubble ---- */
-.bubble {
-  max-width: 72%;
-  border-radius: 16px;
-  padding: 14px 18px;
-  font-size: 14px;
-  line-height: 1.75;
-  position: relative;
-  word-break: break-word;
+.avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.avatar.user-av {
+  background: var(--accent-dim);
+  border: 1px solid var(--border-glow);
+  order: 2;
+}
+.avatar.ai-av {
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.18);
 }
 
+.msg-row.user { gap: 10px; }
+.msg-row.ai   { gap: 10px; }
+.msg-row.user .bubble { order: 1; }
+.msg-row.ai   .bubble { order: 1; }
+
+.bubble {
+  max-width: 74%;
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  font-size: 13.5px;
+  line-height: 1.78;
+  word-break: break-word;
+}
 .msg-row.user .bubble {
   background: var(--user-bg);
   border: 1px solid var(--user-border);
@@ -289,199 +382,127 @@ body::after {
   color: var(--text-1);
   font-weight: 500;
 }
-
 .msg-row.ai .bubble {
   background: var(--ai-bg);
   border: 1px solid var(--ai-border);
   border-bottom-left-radius: 4px;
   color: var(--text-1);
 }
-
-/* ---- Avatar ---- */
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.msg-row.user { gap: 10px; }
-.msg-row.ai   { gap: 10px; }
-
-.avatar.user-av {
-  background: var(--accent-dim);
-  border: 1px solid var(--border-glow);
-  order: 2;
-}
-
-.avatar.ai-av {
-  background: rgba(74,222,128,0.1);
-  border: 1px solid rgba(74,222,128,0.2);
-  order: 0;
-}
-
-.msg-row.user .bubble { order: 1; }
-.msg-row.ai   .bubble { order: 1; }
-
-/* ---- Emergency bubble ---- */
 .bubble.emergency {
   background: var(--red-dim);
-  border-color: rgba(248,113,113,0.35);
+  border-color: rgba(248,113,113,0.3);
   border-left: 3px solid var(--red);
 }
 
-/* ---- Markdown-style rendering ---- */
-.bubble strong {
-  color: var(--accent);
-  font-weight: 600;
-}
-
+/* ── Section blocks ── */
 .bubble .section-block {
   margin: 10px 0;
-  padding: 10px 14px;
-  background: rgba(56,189,248,0.04);
-  border-left: 2px solid var(--border-glow);
+  padding: 10px 13px;
+  background: rgba(56,189,248,0.03);
+  border-left: 2px solid rgba(56,189,248,0.2);
   border-radius: 0 8px 8px 0;
 }
-
 .bubble .section-title {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 500;
   color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
 .bubble .divider {
   border: none;
   border-top: 1px solid var(--border);
   margin: 14px 0;
 }
-
-.bubble ul, .bubble ol {
-  padding-left: 18px;
-  margin: 6px 0;
-}
-
-.bubble li {
-  margin: 4px 0;
-  color: var(--text-2);
-}
-
+.bubble ul, .bubble ol { padding-left: 18px; margin: 6px 0; }
+.bubble li { margin: 4px 0; color: var(--text-2); line-height: 1.65; }
 .bubble li::marker { color: var(--accent); }
+.bubble strong { color: var(--accent); font-weight: 600; }
+.bubble p { margin: 4px 0; }
 
-.bubble a {
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border-glow);
-  transition: border-color 0.2s;
-}
-.bubble a:hover { border-color: var(--accent); }
-
-.bubble .news-item {
-  margin: 10px 0;
-  padding: 10px 12px;
-  background: rgba(14,22,32,0.8);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  transition: border-color 0.2s;
-}
-.bubble .news-item:hover { border-color: var(--border-glow); }
-.bubble .news-title {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-1);
-  margin-bottom: 4px;
-}
-.bubble .news-snippet { font-size: 12px; color: var(--text-2); line-height: 1.6; }
-.bubble .news-link {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--accent);
-  margin-top: 4px;
-  display: block;
-  border: none;
-}
-
-.bubble .hospital-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  margin: 6px 0;
-  background: rgba(14,22,32,0.8);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-.bubble .hospital-icon { font-size: 18px; }
-.bubble .hospital-name { font-weight: 500; font-size: 13.5px; color: var(--text-1); }
-.bubble .hospital-meta { font-size: 11.5px; font-family: var(--font-mono); color: var(--text-2); margin-top: 2px; }
-
+/* Risk badges */
 .risk-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.risk-low    { background: rgba(74,222,128,0.12); color: var(--green);  border: 1px solid rgba(74,222,128,0.3); }
-.risk-medium { background: rgba(251,191,36,0.12);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.3); }
-.risk-high   { background: rgba(248,113,113,0.12); color: var(--red);   border: 1px solid rgba(248,113,113,0.3); }
+.risk-low    { background: rgba(74,222,128,0.1);  color: var(--green);  border: 1px solid rgba(74,222,128,0.25); }
+.risk-medium { background: rgba(251,191,36,0.1);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.25); }
+.risk-high   { background: rgba(248,113,113,0.1); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
 
-/* ---- Typing loader ---- */
+/* News items */
+.news-item {
+  margin: 8px 0;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+.news-item:hover { border-color: var(--border-glow); }
+.news-title { font-weight: 600; font-size: 13px; color: var(--text-1); margin-bottom: 4px; }
+.news-snippet { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.news-link {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  margin-top: 5px;
+  display: block;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.news-link:hover { opacity: 1; }
+
+/* Typing loader */
 .typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 14px 18px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 12px 16px;
 }
 .typing-indicator span {
-  width: 7px;
-  height: 7px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: var(--accent);
-  opacity: 0.4;
+  opacity: 0.3;
   animation: blink 1.2s ease-in-out infinite;
 }
 .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
 @keyframes blink {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
   40%            { opacity: 1;   transform: scale(1.1); }
 }
 
-/* ---- Timestamp ---- */
+/* Timestamp */
 .timestamp {
   font-size: 10px;
   font-family: var(--font-mono);
   color: var(--text-3);
-  margin-top: 5px;
-  text-align: right;
+  margin-top: 4px;
 }
 .msg-row.ai .timestamp { text-align: left; }
+.msg-row.user .timestamp { text-align: right; }
 
-/* ============ INPUT AREA ============ */
+/* ══════════════ INPUT AREA ══════════════ */
 .input-wrap {
-  position: relative;
-  z-index: 10;
-  background: rgba(8,13,20,0.95);
+  background: rgba(6,11,17,0.95);
   border-top: 1px solid var(--border);
-  padding: 16px 28px 20px;
-  backdrop-filter: blur(12px);
+  padding: 14px 24px 18px;
+  backdrop-filter: blur(16px);
   flex-shrink: 0;
 }
-
 .input-inner {
   display: flex;
   align-items: center;
@@ -489,15 +510,13 @@ body::after {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 6px 6px 6px 18px;
+  padding: 5px 5px 5px 16px;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
-
 .input-inner:focus-within {
   border-color: var(--border-glow);
-  box-shadow: 0 0 0 3px rgba(56,189,248,0.07), 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.06), 0 4px 24px rgba(0,0,0,0.3);
 }
-
 .input-inner input {
   flex: 1;
   background: transparent;
@@ -505,54 +524,42 @@ body::after {
   outline: none;
   color: var(--text-1);
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.5;
   caret-color: var(--accent);
 }
-
 .input-inner input::placeholder { color: var(--text-3); }
-
 .send-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px; height: 38px;
   border-radius: 10px;
   border: none;
   background: var(--accent);
-  color: #080d14;
+  color: #060b11;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
   flex-shrink: 0;
 }
-
 .send-btn:hover:not(:disabled) {
   background: #7dd3fc;
-  transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(56,189,248,0.35);
+  transform: scale(1.06);
+  box-shadow: 0 4px 18px rgba(56,189,248,0.35);
 }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.send-btn svg { width: 15px; height: 15px; fill: currentColor; }
 
-.send-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none;
+.input-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 0 2px;
 }
-
-.send-btn svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-
 .input-hint {
-  font-size: 11px;
+  font-size: 10.5px;
   font-family: var(--font-mono);
   color: var(--text-3);
-  margin-top: 8px;
-  text-align: center;
 }
-
 .input-hint kbd {
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -560,154 +567,375 @@ body::after {
   border-radius: 3px;
   font-family: var(--font-mono);
 }
+.disclaimer {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-/* ============ EMERGENCY BANNER ============ */
+/* ══════════════ EMERGENCY BANNER ══════════════ */
 .emergency-banner {
   display: none;
   position: fixed;
-  top: 64px;
-  left: 0; right: 0;
-  z-index: 100;
-  background: linear-gradient(135deg, rgba(248,113,113,0.15), rgba(248,113,113,0.08));
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  background: linear-gradient(90deg, rgba(248,113,113,0.18), rgba(248,113,113,0.10));
   border-bottom: 1px solid rgba(248,113,113,0.3);
-  padding: 12px 28px;
+  padding: 13px 28px;
   font-size: 13px;
   color: var(--red);
-  font-weight: 500;
+  font-weight: 600;
   animation: slide-down 0.3s ease;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
 }
-
 @keyframes slide-down {
   from { transform: translateY(-100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
+.emergency-banner.visible { display: flex; }
+.emergency-close {
+  margin-left: auto;
+  opacity: 0.6;
+  font-size: 16px;
+  transition: opacity 0.2s;
+}
+.emergency-close:hover { opacity: 1; }
 
-.emergency-banner.visible { display: flex; align-items: center; gap: 10px; }
-
-/* ============ RESPONSIVE ============ */
-@media (max-width: 600px) {
-  .header { padding: 0 16px; }
-  .header-badge { display: none; }
-  .msg-row { padding: 6px 14px; }
-  .bubble { max-width: 88%; font-size: 13.5px; }
+/* ══════════════ RESPONSIVE ══════════════ */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .msg-row { padding: 5px 14px; }
+  .bubble { max-width: 90%; font-size: 13px; }
   .input-wrap { padding: 12px 14px 16px; }
-  .welcome h2 { font-size: 24px; }
+  .topbar { padding: 0 16px; }
 }
 </style>
 </head>
 <body>
 
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
 <!-- Emergency Banner -->
-<div class="emergency-banner" id="emergencyBanner">
+<div class="emergency-banner" id="emergencyBanner" onclick="this.classList.remove('visible')">
   🚨 <span id="emergencyText">Emergency detected. Call 112 immediately.</span>
+  <span class="emergency-close">✕</span>
 </div>
 
-<!-- Header -->
-<header class="header">
-  <div class="header-brand">
-    <div class="header-icon">🩺</div>
-    <div>
-      <div class="header-title">Med<span>Chat</span> AI</div>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🩺</div>
+    <div class="brand-name">Med<span>Chat</span> AI</div>
+    <div class="brand-tag">Beta</div>
+  </div>
+
+  <div class="sidebar-section">Navigation</div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Chat</span>
     </div>
-    <div class="header-badge">Beta</div>
-  </div>
-  <div class="header-status">
-    <div class="status-dot"></div>
-    Online
-  </div>
-</header>
+    <div class="nav-item">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Symptom Check</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🏥</span>
+      <span class="nav-label">Hospitals</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">📰</span>
+      <span class="nav-label">Medical News</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🚨</span>
+      <span class="nav-label">Emergency</span>
+      <span class="nav-badge" style="color:var(--red);background:var(--red-dim)">112</span>
+    </div>
+  </nav>
 
-<!-- Chat output -->
-<div id="output">
-  <div class="welcome" id="welcome">
-    <div class="welcome-icon">⚕️</div>
-    <h2>Your <em>Medical</em> Assistant</h2>
-    <p>Ask about symptoms, conditions, nearby hospitals, or the latest medical news. I'll help with structured advice and always remind you to consult a doctor.</p>
-    <div class="suggestions">
-      <div class="suggestion-chip" onclick="fillInput('I have a severe headache and fever')">🤒 Headache & Fever</div>
-      <div class="suggestion-chip" onclick="fillInput('Find hospitals near Delhi')">🏥 Hospitals near Delhi</div>
-      <div class="suggestion-chip" onclick="fillInput('Latest news on diabetes treatment')">📰 Diabetes news</div>
-      <div class="suggestion-chip" onclick="fillInput('I have chest pain and difficulty breathing')">⚠️ Chest pain</div>
-      <div class="suggestion-chip" onclick="fillInput('What are symptoms of dengue fever?')">🦟 Dengue symptoms</div>
-      <div class="suggestion-chip" onclick="fillInput('I have a skin rash that is itching badly')">🩹 Skin rash</div>
+  <div class="sidebar-section">Emergency</div>
+  <div style="padding: 0 16px 12px; font-size: 11.5px; font-family: var(--font-mono); color: var(--text-3); line-height: 2;">
+    Ambulance &nbsp;<span style="color:var(--red)">102</span><br>
+    Emergency &nbsp;<span style="color:var(--red)">112</span><br>
+    Police &nbsp;<span style="color:var(--text-2)">100</span><br>
+    Fire &nbsp;<span style="color:var(--amber)">101</span>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span>AI Online</span>
     </div>
   </div>
-</div>
+</aside>
 
-<!-- Input -->
-<div class="input-wrap">
-  <div class="input-inner">
-    <input
-      id="input"
-      placeholder="Describe symptoms, ask about hospitals or medical news…"
-      onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"
-      autocomplete="off"
-    />
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
-      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-    </button>
+<!-- Main content -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="topbar-title"><strong>Medical Assistant</strong></span>
+    <div class="topbar-divider"></div>
+    <span class="topbar-info">RAG + Symptom Analysis + Web Search</span>
+    <div class="topbar-right">
+      <button class="clear-btn" onclick="clearChat()">Clear chat</button>
+    </div>
   </div>
-  <div class="input-hint">Press <kbd>Enter</kbd> to send &nbsp;·&nbsp; Not a substitute for professional medical advice</div>
-</div>
+
+  <!-- Chat output -->
+  <div id="output">
+    <div class="welcome" id="welcome">
+      <div class="welcome-glyph">⚕️</div>
+      <h2>Your <em>Medical</em> Assistant</h2>
+      <p>Ask about symptoms, conditions, or the latest medical news. I'll help with structured advice and always remind you to consult a doctor.</p>
+      <div class="chips">
+        <div class="chip" onclick="fillInput('I have a severe headache and fever')">🤒 Headache &amp; Fever</div>
+        <div class="chip" onclick="fillInput('Find hospitals near Delhi')">🏥 Hospitals Delhi</div>
+        <div class="chip" onclick="fillInput('Latest news on diabetes treatment')">📰 Diabetes news</div>
+        <div class="chip" onclick="fillInput('I have chest pain and difficulty breathing')">⚠️ Chest pain</div>
+        <div class="chip" onclick="fillInput('What are symptoms of dengue fever?')">🦟 Dengue symptoms</div>
+        <div class="chip" onclick="fillInput('I have a skin rash that is itching badly')">🩹 Skin rash</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-wrap">
+    <div class="input-inner">
+      <input
+        id="input"
+        placeholder="Describe symptoms, ask about conditions or medical news…"
+        onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"
+        autocomplete="off"
+      />
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-meta">
+      <div class="input-hint">Press <kbd>Enter</kbd> to send</div>
+      <div class="disclaimer">⚕ Not a substitute for professional medical advice</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
 
 <script>
-/* ---- Utility ---- */
+/* ════════════════════════════════════
+   UTILITY
+════════════════════════════════════ */
 function now() {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-
 function fillInput(text) {
   const inp = document.getElementById('input');
   inp.value = text;
   inp.focus();
 }
-
 function scrollBottom() {
   const out = document.getElementById('output');
-  out.scrollTop = out.scrollHeight;
+  requestAnimationFrame(() => { out.scrollTop = out.scrollHeight; });
+}
+function clearChat() {
+  const out = document.getElementById('output');
+  out.innerHTML = '';
+  // Re-add welcome
+  const w = document.createElement('div');
+  w.className = 'welcome';
+  w.id = 'welcome';
+  w.innerHTML = `
+    <div class="welcome-glyph">⚕️</div>
+    <h2>Your <em>Medical</em> Assistant</h2>
+    <p>Ask about symptoms, conditions, or the latest medical news.</p>
+    <div class="chips">
+      <div class="chip" onclick="fillInput('I have a severe headache and fever')">🤒 Headache &amp; Fever</div>
+      <div class="chip" onclick="fillInput('Latest news on diabetes treatment')">📰 Diabetes news</div>
+      <div class="chip" onclick="fillInput('I have chest pain and difficulty breathing')">⚠️ Chest pain</div>
+    </div>`;
+  out.appendChild(w);
 }
 
-/* ---- Render formatted response ---- */
-function renderResponse(text) {
-  const isEmergency = /EMERGENCY|AMBULANCE|call\s*1[01][02]/i.test(text);
+/* ════════════════════════════════════
+   TEXT FORMATTING
+════════════════════════════════════ */
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
-  // Show emergency banner
+function formatInline(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
+/* ════════════════════════════════════
+   RESPONSE RENDERER — FIXED
+   Handles the actual backend output format
+════════════════════════════════════ */
+function renderResponse(rawText) {
+  const isEmergency = /EMERGENCY|AMBULANCE|call\s*1[01][02]/i.test(rawText);
+
   if (isEmergency) {
     const banner = document.getElementById('emergencyBanner');
-    banner.classList.add('visible');
     document.getElementById('emergencyText').textContent =
       '🚨 Emergency detected! Call 112 (Ambulance: 102) immediately.';
-    setTimeout(() => banner.classList.remove('visible'), 15000);
+    banner.classList.add('visible');
+    setTimeout(() => banner.classList.remove('visible'), 20000);
   }
 
-  // Split by --- sections
-  const sections = text.split(/\n---+\n/);
+  // Split by --- section separators the backend uses
+  const sections = rawText.split(/\n\s*---+\s*\n/);
   let html = '';
 
   sections.forEach((section, idx) => {
     if (idx > 0) html += '<hr class="divider">';
+    const trimmed = section.trim();
+    if (!trimmed) return;
 
-    // Detect section type
-    const isNews    = /📰|Latest.*News|News:/i.test(section);
-    const isHospital= /🏥|Nearby.*Hospital|Hospital.*Clinic/i.test(section);
-    const isEmerg   = /EMERGENCY|🚨/i.test(section);
+    const isNews     = /Latest.*News|Medical.*News/i.test(trimmed);
+    const isEmerg    = /EMERGENCY|🚨/i.test(trimmed);
 
     if (isEmerg) {
-      html += `<div style="color:var(--red)">${formatText(section)}</div>`;
+      html += `<div style="color:var(--red)">${renderGeneral(trimmed)}</div>`;
     } else if (isNews) {
-      html += renderNewsSection(section);
-    } else if (isHospital) {
-      html += renderHospitalSection(section);
+      html += renderNews(trimmed);
     } else {
-      html += renderMedicalSection(section);
+      html += renderMedical(trimmed);
     }
   });
 
   return { html, isEmergency };
 }
 
-function formatText(text) {
+/* ── Render medical / symptom section ── */
+function renderMedical(text) {
+  let html = '';
+  const lines = text.split('\n');
+  let listBuffer = [];
+
+  function flushList() {
+    if (listBuffer.length) {
+      html += '<ul>' + listBuffer.map(l => `<li>${formatInline(l)}</li>`).join('') + '</ul>';
+      listBuffer = [];
+    }
+  }
+
+  lines.forEach(line => {
+    const trimLine = line.trim();
+    if (!trimLine) { flushList(); return; }
+
+    // **Section Header:** optional content
+    const headerMatch = trimLine.match(/^\*\*(.+?):\*\*\s*(.*)/);
+    if (headerMatch) {
+      flushList();
+      const title   = headerMatch[1].trim();
+      const content = headerMatch[2].trim();
+
+      if (/risk\s*level/i.test(title)) {
+        const level = (content.match(/LOW|MEDIUM|HIGH/i) || ['UNKNOWN'])[0].toUpperCase();
+        const cls   = level === 'LOW' ? 'risk-low' : level === 'HIGH' ? 'risk-high' : 'risk-medium';
+        const icon  = level === 'LOW' ? '🟢' : level === 'HIGH' ? '🔴' : '🟡';
+        html += `<div class="section-block">
+          <div class="section-title">⚠ ${escapeHtml(title)}</div>
+          <span class="risk-badge ${cls}">${icon} ${level}</span>
+        </div>`;
+      } else {
+        const icon = getSectionIcon(title);
+        html += `<div class="section-block">
+          <div class="section-title">${icon} ${escapeHtml(title)}</div>
+          ${content ? `<div>${formatInline(escapeHtml(content))}</div>` : ''}
+        </div>`;
+      }
+      return;
+    }
+
+    // Bullet / numbered list items
+    const bulletMatch = trimLine.match(/^[•\-\*]\s+(.*)/);
+    if (bulletMatch) { listBuffer.push(bulletMatch[1]); return; }
+
+    const numberedMatch = trimLine.match(/^\d+[.)]\s+(.*)/);
+    if (numberedMatch) { listBuffer.push(numberedMatch[1]); return; }
+
+    // Plain text within a section block (continuation lines, not headers)
+    // Check if we're inside the last section block — append to it
+    flushList();
+    html += `<p style="margin:3px 0;color:var(--text-2)">${formatInline(escapeHtml(trimLine))}</p>`;
+  });
+
+  flushList();
+  return html;
+}
+
+/* ── Section icon map ── */
+function getSectionIcon(title) {
+  const t = title.toLowerCase();
+  if (/problem|explanation/i.test(t))  return '🔍';
+  if (/risk/i.test(t))                 return '⚠';
+  if (/cause/i.test(t))                return '🧬';
+  if (/precaution|right now/i.test(t)) return '🛡';
+  if (/doctor|see a/i.test(t))         return '🏥';
+  if (/follow.?up|question/i.test(t))  return '❓';
+  if (/reference|medical ref/i.test(t))return '📚';
+  if (/news/i.test(t))                 return '📰';
+  return '•';
+}
+
+/* ── Render news section ── */
+function renderNews(text) {
+  let html = `<div class="section-block">
+    <div class="section-title">📰 Latest Medical News</div>`;
+
+  // Strip the section header line (** Latest Related News:** etc.)
+  const body = text
+    .replace(/\*\*\s*Latest.*?News.*?\*\*\s*\n?/i, '')
+    .replace(/\*\*\s*Medical.*?Reference.*?\*\*\s*\n?/i, '')
+    .trim();
+
+  if (!body || body === 'No news results found.') {
+    html += `<p style="color:var(--text-3);font-size:12px;padding:6px 0">No results found.</p>`;
+    html += '</div>';
+    return html;
+  }
+
+  // DuckDuckGoSearchRun returns one big paragraph with sentences joined by "... ..."
+  // Split on "... ..." or ".. ." patterns to get individual snippets
+  const sentences = body
+    .split(/\.\s*\.\s*\./)          // split on "..."
+    .map(s => s.trim())
+    .filter(s => s.length > 20);   // drop empty/tiny fragments
+
+  if (sentences.length <= 1) {
+    // Couldn't split — just show as a single card
+    html += `<div class="news-item">
+      <div class="news-snippet">${escapeHtml(body)}</div>
+    </div>`;
+  } else {
+    sentences.forEach(sentence => {
+      const clean = sentence.replace(/^\s*[\-\|]\s*/, '').trim();
+      if (!clean) return;
+      html += `<div class="news-item">
+        <div class="news-snippet">${escapeHtml(clean)}</div>
+      </div>`;
+    });
+  }
+
+  html += '</div>';
+  return html;
+}
+
+/* ── Generic renderer (fallback) ── */
+function renderGeneral(text) {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n•\s/g, '<br>• ')
@@ -715,121 +943,16 @@ function formatText(text) {
     .replace(/\n/g, '<br>');
 }
 
-function renderMedicalSection(text) {
-  let html = '';
-  const lines = text.split('\n');
-
-  lines.forEach(line => {
-    if (!line.trim()) return;
-
-    // Section headers like **Problem Explanation:**
-    const headerMatch = line.match(/^\*\*(.+?):\*\*\s*(.*)/);
-    if (headerMatch) {
-      const title = headerMatch[1];
-      const content = headerMatch[2];
-
-      // Risk level special rendering
-      if (/risk level/i.test(title)) {
-        const level = (content.match(/LOW|MEDIUM|HIGH/i) || [''])[0].toUpperCase();
-        const cls = level === 'LOW' ? 'risk-low' : level === 'HIGH' ? 'risk-high' : 'risk-medium';
-        html += `
-          <div class="section-block">
-            <div class="section-title">${title}</div>
-            <span class="risk-badge ${cls}">${level || content}</span>
-          </div>`;
-      } else {
-        html += `
-          <div class="section-block">
-            <div class="section-title">${title}</div>
-            <div>${content || ''}</div>
-          </div>`;
-      }
-      return;
-    }
-
-    // Bullet points
-    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-      html += `<li>${formatText(line.replace(/^[•\-\*]\s*/, ''))}</li>`;
-      return;
-    }
-
-    // Numbered list
-    if (/^\d+\./.test(line)) {
-      html += `<li>${formatText(line.replace(/^\d+\.\s*/, ''))}</li>`;
-      return;
-    }
-
-    html += `<p style="margin:4px 0">${formatText(line)}</p>`;
-  });
-
-  return html;
+/* ════════════════════════════════════
+   DOM HELPERS
+════════════════════════════════════ */
+function removeWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
 }
 
-function renderNewsSection(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  let html = '<div class="section-title" style="margin-bottom:10px">📰 Latest News</div>';
-
-  let current = null;
-  lines.forEach(line => {
-    if (line.startsWith('•') || line.match(/^\*\*/)) {
-      if (current) html += buildNewsItem(current);
-      current = { title: '', snippet: '', link: '' };
-      current.title = line.replace(/^•\s*\*\*/, '').replace(/\*\*$/, '').replace(/^•\s*/, '');
-    } else if (line.startsWith('  ') && !line.includes('🔗')) {
-      if (current) current.snippet = line.trim();
-    } else if (line.includes('🔗')) {
-      if (current) current.link = line.replace(/.*🔗\s*/, '').trim();
-    }
-  });
-  if (current) html += buildNewsItem(current);
-
-  return html;
-}
-
-function buildNewsItem(item) {
-  return `
-    <div class="news-item">
-      <div class="news-title">${item.title || 'News'}</div>
-      ${item.snippet ? `<div class="news-snippet">${item.snippet}</div>` : ''}
-      ${item.link ? `<a class="news-link" href="${item.link}" target="_blank" rel="noopener">🔗 ${item.link}</a>` : ''}
-    </div>`;
-}
-
-function renderHospitalSection(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  let html = '';
-
-  lines.forEach(line => {
-    if (line.includes('🏥') || line.startsWith('•')) {
-      const parts = line.replace(/^•\s*🏥\s*/, '').split('|');
-      const name  = (parts[0] || '').replace(/\*\*/g, '').trim();
-      const phone = (parts[1] || '').replace('📞', '').trim();
-      const type  = name.match(/\((.+?)\)/)?.[1] || 'Hospital';
-      const cleanName = name.replace(/\(.+?\)/, '').trim();
-      html += `
-        <div class="hospital-item">
-          <div class="hospital-icon">🏥</div>
-          <div>
-            <div class="hospital-name">${cleanName}</div>
-            <div class="hospital-meta">${type} · ${phone || 'N/A'}</div>
-          </div>
-        </div>`;
-    } else if (line.includes('102') || line.includes('112') || line.includes('EMERGENCY')) {
-      html += `<div style="margin-top:12px;padding:10px 14px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.2);border-radius:8px;font-size:12.5px;color:var(--red)">${formatText(line)}</div>`;
-    } else if (line.trim()) {
-      html += `<p style="margin:4px 0;color:var(--text-2);font-size:13px">${formatText(line)}</p>`;
-    }
-  });
-
-  return html;
-}
-
-/* ---- Add message to chat ---- */
 function addMessage(role, content, isHtml = false) {
-  // Remove welcome screen on first message
-  const welcome = document.getElementById('welcome');
-  if (welcome) welcome.remove();
-
+  removeWelcome();
   const output = document.getElementById('output');
 
   const row = document.createElement('div');
@@ -841,35 +964,33 @@ function addMessage(role, content, isHtml = false) {
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-
-  if (isHtml) {
-    bubble.innerHTML = content;
-  } else {
-    bubble.textContent = content;
-  }
+  if (isHtml) bubble.innerHTML = content;
+  else bubble.textContent = content;
 
   const ts = document.createElement('div');
   ts.className = 'timestamp';
   ts.textContent = now();
 
   const wrap = document.createElement('div');
-  wrap.style.display = 'flex';
-  wrap.style.flexDirection = 'column';
+  wrap.style.cssText = 'display:flex;flex-direction:column;max-width:74%';
   wrap.appendChild(bubble);
   wrap.appendChild(ts);
 
-  row.appendChild(avatar);
-  row.appendChild(wrap);
-  output.appendChild(row);
+  if (role === 'user') {
+    row.appendChild(wrap);
+    row.appendChild(avatar);
+  } else {
+    row.appendChild(avatar);
+    row.appendChild(wrap);
+  }
 
+  output.appendChild(row);
   scrollBottom();
   return bubble;
 }
 
 function addTypingIndicator() {
-  const welcome = document.getElementById('welcome');
-  if (welcome) welcome.remove();
-
+  removeWelcome();
   const output = document.getElementById('output');
   const row = document.createElement('div');
   row.className = 'msg-row ai';
@@ -894,7 +1015,9 @@ function removeTypingIndicator() {
   if (el) el.remove();
 }
 
-/* ---- Main send function (API logic unchanged) ---- */
+/* ════════════════════════════════════
+   MAIN SEND
+════════════════════════════════════ */
 async function sendMessage() {
   const input   = document.getElementById('input');
   const sendBtn = document.getElementById('sendBtn');
@@ -903,15 +1026,16 @@ async function sendMessage() {
 
   addMessage('user', question);
   input.value = '';
-  input.disabled  = true;
+  input.disabled   = true;
   sendBtn.disabled = true;
-
   addTypingIndicator();
 
   try {
     const response = await fetch(
       `http://localhost:8000/agent?query=${encodeURIComponent(question)}`
     );
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
     removeTypingIndicator();
@@ -924,8 +1048,11 @@ async function sendMessage() {
 
   } catch (error) {
     removeTypingIndicator();
+    console.error('MedChat error:', error);
     addMessage('ai',
-      '<strong style="color:var(--red)">Connection Error</strong><br>Could not reach the server. Please ensure the backend is running on <code style="font-family:var(--font-mono);background:var(--surface-2);padding:2px 5px;border-radius:3px">localhost:8000</code>.',
+      `<strong style="color:var(--red)">Connection Error</strong>
+       <p style="margin-top:6px;color:var(--text-2)">Could not reach the backend. Make sure it's running on
+       <code style="font-family:var(--font-mono);background:var(--surface-2);padding:2px 6px;border-radius:4px">localhost:8000</code>.</p>`,
       true
     );
   } finally {

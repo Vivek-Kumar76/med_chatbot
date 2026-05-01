@@ -20,10 +20,9 @@ from langchain.tools import Tool
 from langchain.agents import initialize_agent, AgentType
 from langchain.memory import ConversationBufferMemory
 
-# DuckDuckGo
-from duckduckgo_search import DDGS
+from langchain_community.tools import DuckDuckGoSearchRun
 
-# -------------------- APP --------------------
+#  APP
 app = FastAPI()
 load_dotenv()
 
@@ -35,27 +34,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -------------------- STATIC --------------------
+#  STATIC 
 app.mount("/static", StaticFiles(directory="static_page"), name="static")
 
 @app.get("/")
 def home():
     return FileResponse("static_page/index.html")
 
-# -------------------- MEMORY --------------------
+# MEMORY 
 memory = ConversationBufferMemory(
     memory_key="chat_history",
     return_messages=True
 )
 
-# -------------------- EMBEDDING --------------------
+#  EMBEDDING 
 embedding = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
 index_path = "faiss_index"
 
-# -------------------- VECTOR DB --------------------
+#  VECTOR DB 
 if not os.path.exists(index_path):
     print("Creating FAISS index...")
     docs = []
@@ -82,13 +81,13 @@ else:
 
 retriever = vectordb.as_retriever(search_kwargs={"k": 2})
 
-# -------------------- LLM --------------------
+#  LLM 
 model = ChatGoogleGenerativeAI(
     model="gemini-3-flash-preview",
     temperature=0.3
 )
 
-# -------------------- PROMPT --------------------
+#  PROMPT 
 prompt = PromptTemplate(
     template="""
 You are a safe medical assistant.
@@ -107,7 +106,7 @@ Question: {question}
 
 parser = StrOutputParser()
 
-# -------------------- TOOL 1: RAG MEDICAL QA --------------------
+#  TOOL 1: RAG MEDICAL QA 
 def medical_qa(query: str):
     docs = retriever.invoke(query)
     context = "\n\n".join([doc.page_content for doc in docs])
@@ -120,7 +119,7 @@ qa_tool = Tool(
     description="Answer medical questions using dataset"
 )
 
-# -------------------- TOOL 2: LLM SYMPTOM ANALYZER --------------------
+#  TOOL 2: LLM SYMPTOM ANALYZER 
 def symptom_checker(text: str):
     try:
         chat_history = memory.load_memory_variables({})["chat_history"]
@@ -165,10 +164,10 @@ symptom_tool = Tool(
     description="Analyze symptoms using LLM"
 )
 
-# -------------------- TOOL 3: EMERGENCY DETECTOR --------------------
+#  TOOL 3: EMERGENCY DETECTOR 
 # India Emergency Numbers
 INDIA_EMERGENCY_NUMBERS = """
-🚨 INDIA EMERGENCY CONTACTS:
+ INDIA EMERGENCY CONTACTS:
 • Ambulance (National):        102
 • Emergency Helpline:          112
 • Police:                      100
@@ -194,7 +193,7 @@ def emergency_detector(text: str):
 
     if any(k in t for k in emergency_keywords):
         return (
-            "🚨 **MEDICAL EMERGENCY DETECTED!**\n\n"
+            " **MEDICAL EMERGENCY DETECTED!**\n\n"
             "**Do NOT wait — take immediate action:**\n"
             "1. Call 112 (National Emergency) or 102 (Ambulance) RIGHT NOW\n"
             "2. Keep the person calm and still\n"
@@ -206,23 +205,16 @@ def emergency_detector(text: str):
     return ""
 
 
-# -------------------- TOOL 4: WEB SEARCH --------------------
+#  TOOL 4: WEB SEARCH
 def web_search_safe(query: str):
     try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=5))
+        search = DuckDuckGoSearchRun()
+        result = search.invoke(query)
 
-        if not results:
+        if not result:
             return "No news results found."
 
-        formatted = []
-        for r in results:
-            title = r.get("title", "No Title")
-            body = r.get("body", "")[:200]
-            href = r.get("href", "")
-            formatted.append(f"• **{title}**\n  {body}\n  🔗 {href}")
-
-        return "\n\n".join(formatted)
+        return result  
 
     except Exception as e:
         return f"Search error: {str(e)}"
@@ -233,102 +225,11 @@ web_tool = Tool(
     description="Search latest medical news and info"
 )
 
-# -------------------- TOOL 5: HOSPITAL FINDER --------------------
-def hospital_finder(query: str):
-    try:
-        location = query.lower()
-        location = re.sub(
-            r"(hospital|hospitals|nearby|in|find|search|clinic|clinics|doctor|doctors|near me)",
-            "", location
-        ).strip()
+# TOOL 5: HOSPITAL FINDER --------------------
 
-        lat, lon = None, None
-        resolved_location = location
 
-        # If no location extracted, use IP geolocation as fallback
-        if not location:
-            try:
-                geo = requests.get("https://ipapi.co/json/", timeout=5).json()
-                lat = geo.get("latitude")
-                lon = geo.get("longitude")
-                resolved_location = geo.get("city", "your location")
-            except Exception:
-                return (
-                    "Could not detect your location automatically.\n"
-                    "Please specify a location, e.g. 'hospitals in Delhi'."
-                )
-        else:
-            # Use Nominatim (OpenStreetMap) for reliable geocoding — free, no API key needed
-            try:
-                geo_url = (
-                    f"https://nominatim.openstreetmap.org/search"
-                    f"?q={requests.utils.quote(location)}&format=json&limit=1"
-                )
-                geo_res = requests.get(
-                    geo_url,
-                    headers={"User-Agent": "medical-assistant-app"},
-                    timeout=5
-                ).json()
-
-                if geo_res:
-                    lat = geo_res[0]["lat"]
-                    lon = geo_res[0]["lon"]
-                    resolved_location = geo_res[0].get("display_name", location).split(",")[0]
-
-            except Exception:
-                pass
-
-        if not lat or not lon:
-            return f"Could not find the location '{location}'. Please try a more specific city name."
-
-        # Query OpenStreetMap Overpass API for nearby hospitals
-        query_osm = f"""
-        [out:json];
-        (
-          node["amenity"="hospital"](around:5000,{lat},{lon});
-          node["amenity"="clinic"](around:5000,{lat},{lon});
-        );
-        out;
-        """
-
-        res = requests.get(
-            "https://overpass-api.de/api/interpreter",
-            params={"data": query_osm},
-            timeout=10
-        )
-        data = res.json()
-
-        hospitals = []
-        for el in data.get("elements", [])[:7]:
-            tags = el.get("tags", {})
-            name = tags.get("name", "Unknown Hospital/Clinic")
-            phone = tags.get("phone") or tags.get("contact:phone") or "N/A"
-            amenity_type = tags.get("amenity", "facility").capitalize()
-            hospitals.append(f"• 🏥 **{name}** ({amenity_type}) | 📞 {phone}")
-
-        if not hospitals:
-            return (
-                f"No hospitals or clinics found near **{resolved_location}** within 5 km.\n"
-                "Try searching with a broader city name.\n\n"
-                + INDIA_EMERGENCY_NUMBERS
-            )
-
-        result = f"**Nearby Hospitals & Clinics near {resolved_location}:**\n\n"
-        result += "\n".join(hospitals)
-        result += f"\n\n{INDIA_EMERGENCY_NUMBERS}"
-        return result
-
-    except Exception as e:
-        return f"Error finding hospitals: {str(e)}"
-
-hospital_tool = Tool(
-    name="Hospital_Finder",
-    func=hospital_finder,
-    description="Find nearby hospitals and clinics"
-)
-
-# -------------------- AGENT --------------------
-tools = [qa_tool, symptom_tool, web_tool, hospital_tool]
+#  AGENT 
+tools = [qa_tool, symptom_tool, web_tool]
 
 agent = initialize_agent(
     tools=tools,
@@ -340,21 +241,18 @@ agent = initialize_agent(
     max_iterations=3
 )
 
-# -------------------- MULTI-INTENT API --------------------
+#  MULTI-INTENT API 
 @app.get("/agent")
 def run_agent(query: str):
     try:
         response_parts = []
         q = query.lower()
-
-        # ---- STEP 1: Emergency check (always runs first, stops everything else) ----
         emergency = emergency_detector(query)
         if emergency:
             return {"response": emergency}
 
-        # ---- STEP 2: Broader keyword lists for better intent detection ----
         symptom_keywords = [
-            "pain", "fever", "cut", "blood", "injury", "headache", "nausea",
+            "pain", "fever", "deep cut", "blood", "injury", "headache", "nausea",
             "vomiting", "cough", "cold", "rash", "dizzy", "fatigue", "swelling",
             "itching", "burning", "sore", "ache", "breathe", "breathing",
             "infection", "diarrhea", "constipation", "allergy", "allergic",
@@ -364,10 +262,10 @@ def run_agent(query: str):
             "urine", "discharge", "pus", "bump", "lump", "numb", "tingling"
         ]
 
-        hospital_keywords = [
-            "hospital", "nearby", "clinic", "doctor near",
-            "emergency room", "near me", "find hospital", "find clinic"
-        ]
+#        hospital_keywords = [
+#           "hospital", "nearby", "clinic", "doctor near",
+#            "emergency room", "near me", "find hospital", "find clinic"
+#        ]
 
         news_keywords = [
             "news", "latest", "recent", "update", "outbreak",
@@ -375,30 +273,44 @@ def run_agent(query: str):
         ]
 
         is_symptom  = any(word in q for word in symptom_keywords)
-        is_hospital = any(word in q for word in hospital_keywords)
+        #is_hospital = any(word in q for word in hospital_keywords)
         is_news     = any(word in q for word in news_keywords)
 
-        # ---- STEP 3: Symptom analysis + RAG medical context ----
         if is_symptom:
             response_parts.append(symptom_checker(query))
             rag_answer = medical_qa(query)
             if rag_answer:
-                response_parts.append(f"**📚 Medical Reference:**\n{rag_answer}")
+                response_parts.append(f"** Medical Reference:**\n{rag_answer}")
 
-        # ---- STEP 4: Hospital finder ----
-        if is_hospital:
-            response_parts.append(hospital_finder(query))
 
-        # ---- STEP 5: Always fetch latest news for symptom or news queries ----
         if is_news or is_symptom:
             news_query = f"{query} medical news latest"
             news_result = web_search_safe(news_query)
             if news_result:
-                response_parts.append(f"**📰 Latest Related News:**\n{news_result}")
+                response_parts.append(f"** Latest Related News:**\n{news_result}")
 
         # ---- STEP 6: Fallback to agent if nothing matched ----
+        # ---- STEP 6: Fallback to agent if nothing matched ----
         if not response_parts:
-            response_parts.append(agent.run(query))
+            agent_response = agent.run(query)
+            formatted_response = f"""
+            **Problem Explanation:**
+            {agent_response}
+            **Risk Level:**
+            LOW
+            **Possible Causes:**
+            • General informational query
+            **Precautions to Take Right Now:**
+                1. Stay informed from reliable sources
+                2. Do not self-diagnose
+
+            **When to See a Doctor:**
+            If you experience symptoms or concerns
+
+            **Follow-up Questions:**
+                1. Do you want detailed symptoms?
+                2. Should I find nearby hospitals?"""
+            response_parts.append(formatted_response)
 
         return {"response": "\n\n---\n\n".join(response_parts)}
 
